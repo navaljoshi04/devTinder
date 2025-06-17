@@ -28,3 +28,29 @@ app.post("/signup", async (req, res) => {
     res.status(400).send("Error saving the user :"+ error.message);
   }
 });
+
+
+//find the user by email :
+app.get("/user", async(req,res)=>{
+    const userEmail= req.body.email;
+   try {
+     const user = await User.find({email:userEmail});
+     if(user.length===0){
+        res.status(404).send("No available user exists with such mail id ......")
+     }
+     res.send(user);
+   } catch (error) {
+     res.status(400).send("Something went wrong")
+   }
+})
+
+//? this is the api where i can get all the user from the api: 
+app.get("/feed",async (req,res)=>{
+    try {
+        const user= await User.find({});
+        res.send(user);
+    } catch (error) {
+          res.status(400).send("Something went wrong");
+    }
+})
+
