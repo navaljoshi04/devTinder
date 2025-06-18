@@ -1,6 +1,8 @@
 import express from "express";
 import connectWithDataBase from "./config/database.js";
 import User from "./models/user.js";
+import bcrypt from "bcrypt";
+import validateSignupData from "./utils/validation.js";
 const app = express();
 connectWithDataBase();
 
@@ -12,16 +14,33 @@ app.listen(3000, () => {
 
 app.post("/signup", async (req, res) => {
   console.log(req.body);
-  //?this was the time when we were hardcoding the values :
+
+  //!this was the time when we were hardcoding the values :
   //   const user = new User({
   //     firstName: "virat",
   //     lastName: "kohli",
   //     email: "viratkohli@gmail.com",
   //     password: "viratkohli",
   //   });
-  //? this is the dynamic way to save data from the api
-  const user = new User(req.body);
+
   try {
+    //! goood way of wrting a code is validating the data nd then encrypting the password:
+    validateSignupData(req);
+    //password hashing:
+    const { firstName, lastName, email, password, gender, age, skills } =
+      req.body;
+    const passwordHash = await bcrypt.hash(password, 10);
+    console.log(passwordHash);
+    //? this is the dynamic way to save data from the api
+    const user = new User({
+      firstName,
+      lastName,
+      email,
+      password: passwordHash,
+      gender,
+      age,
+      skills,
+    });
     await user.save();
     res.send("user added successfully .....");
   } catch (error) {
@@ -75,14 +94,43 @@ app.delete("/deleteUser", async (req, res) => {
 });
 
 //? update the data from the database:
-app.patch("/update", async (req, res) => {
-  const userId = req.body.userId;
+app.patch("/update/:userId", async (req, res) => {
+  const userId = req.params?.userId;
   const data = req.body;
   console.log(data);
+
   try {
-    await User.findByIdAndUpdate({ _id: userId }, data);
+    //api validations that we want :
+    const allowedUpdates = ["about", "gender", "age", "skills"];
+    const isUpdateAllowed = Object.keys(data).every((k) =>
+      allowedUpdates.includes(k)
+    );
+    if (!isUpdateAllowed) {
+      throw new Error("Updates not allowed .....");
+    }
+    const user = await User.findByIdAndUpdate({ _id: userId }, data);
+    console.log(user);
     res.send("Updated the data successfully ......");
   } catch (error) {
     res.status(400).send("No such user exist ....");
+  }
+});
+
+//? now we need to do the login for the user:
+app.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+      throw new Error("invalid credentials  ....");
+    }
+    const isPassValid = await bcrypt.compare(password, user.password);
+    if (isPassValid) {
+      res.send("Login successfully to the Database ....");
+    } else {
+      throw new Error("invalid credentials  ...");
+    }
+  } catch (error) {
+    res.status(400).send("error while login .." + error.message);
   }
 });
