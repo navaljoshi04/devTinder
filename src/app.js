@@ -3,11 +3,15 @@ import connectWithDataBase from "./config/database.js";
 import User from "./models/user.js";
 import bcrypt from "bcrypt";
 import validateSignupData from "./utils/validation.js";
+import cookieParser from "cookie-parser";
+import jwt from "jsonwebtoken";
+import userAuth from "./middleware/auth.js";
 const app = express();
 connectWithDataBase();
 
 //middleware without this req.body will give undefined.
 app.use(express.json());
+app.use(cookieParser());
 app.listen(3000, () => {
   console.log("server is succesfully listening on port 3000.....");
 });
@@ -73,7 +77,7 @@ app.get("/feed", async (req, res) => {
 });
 
 //? this is the command where we can get the user by id:
-app.get("/getbyID/:id", async (req, res) => {
+app.get("/getbyID/:id", userAuth, async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     res.send(user);
@@ -94,7 +98,7 @@ app.delete("/deleteUser", async (req, res) => {
 });
 
 //? update the data from the database:
-app.patch("/update/:userId", async (req, res) => {
+app.patch("/update/:userId", userAuth, async (req, res) => {
   const userId = req.params?.userId;
   const data = req.body;
   console.log(data);
@@ -126,11 +130,43 @@ app.post("/login", async (req, res) => {
     }
     const isPassValid = await bcrypt.compare(password, user.password);
     if (isPassValid) {
+      //! create a token and add token to the cookie and send the response back to the user:
+      // const token = jwt.sign({ _id: user._id }, "secretkey@1234", {
+      //   expiresIn: "7d",
+      // });
+      // console.log(token);
+      //! yeh funtion humne schema m define krdia h toh yha pe nhi bna rhe h that is good practise
+      const token = await user.getJWT();
+      res.cookie("token", token);
       res.send("Login successfully to the Database ....");
     } else {
       throw new Error("invalid credentials  ...");
     }
   } catch (error) {
     res.status(400).send("error while login .." + error.message);
+  }
+});
+
+app.get("/profile", userAuth, async (req, res) => {
+  try {
+    // //validate the token:
+    //! yeh sb m authmiddleware se krwa rha hu ab so is function m krne ki jrurat nhi h :
+    // const cookies = req.cookies;
+    // const { token } = cookies;
+    // // console.log(cookies);
+    // //!validate the token :
+    // const decodedMsg = await jwt.verify(token, "secretkey@1234");
+    // console.log(decodedMsg);
+    // const { _id } = decodedMsg;
+    // console.log("logged in user is : " + _id);
+    // //? we can get the user information by this:
+    // const user = await User.findById(_id);
+    // if (!user) {
+    //   throw new Error("user does not exist ...");
+    // }
+    const user = req.user;
+    res.send(user);
+  } catch (error) {
+    res.status(400).send("error" + error.message);
   }
 });
