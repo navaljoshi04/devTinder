@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import User from "../models/user.js";
+
 const userAuth = async (req, res, next) => {
   //? read the token from the req cookies
   //? validate the token

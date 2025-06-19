@@ -1,7 +1,8 @@
+import User from "../models/user.js";
 import express from "express";
-import User from "../models/user";
-import bcrypt from 'bcrypt';
 
+import bcrypt from "bcrypt";
+import validateSignupData from "../utils/validation.js";
 const authRouter = express.Router();
 
 authRouter.post("/signup", async (req, res) => {
@@ -40,7 +41,6 @@ authRouter.post("/signup", async (req, res) => {
   }
 });
 
-
 //? now we need to do the login for the user:
 authRouter.post("/login", async (req, res) => {
   try {
@@ -67,5 +67,16 @@ authRouter.post("/login", async (req, res) => {
     res.status(400).send("error while login .." + error.message);
   }
 });
+
+
+//? for the logout of the user : 
+authRouter.post("/logout", async(req,  res)=>{
+  res.cookie("token",null,{
+    expires:new Date(Date.now()),
+  })
+  res.send("Logout successful .. ")
+});
+ 
+
 
 export default authRouter;

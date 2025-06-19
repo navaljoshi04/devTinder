@@ -6,12 +6,22 @@ import validateSignupData from "./utils/validation.js";
 import cookieParser from "cookie-parser";
 import jwt from "jsonwebtoken";
 import userAuth from "./middleware/auth.js";
+import authRouter from "./routes/authRouter.js";
+import profileRouter from "./routes/profileRouter.js";
+import requestRouter from "./routes/requestRouter.js";
+
 const app = express();
 connectWithDataBase();
 
 //middleware without this req.body will give undefined.
 app.use(express.json());
 app.use(cookieParser());
+
+
+app.use("/auth",authRouter);
+app.use("/profile",profileRouter);
+app.use("/request",requestRouter);
+
 app.listen(3000, () => {
   console.log("server is succesfully listening on port 3000.....");
 });
