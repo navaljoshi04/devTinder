@@ -7,7 +7,7 @@ import User from "../models/user.js";
 requestRouter.post(
   "/request/send/:status/:toUserId",
   userAuth,
-  async (req, res) => {
+  async (req, res, next) => {
     try {
       const fromUserId = req.user._id;
       const toUserId = req.params.toUserId;
@@ -21,11 +21,11 @@ requestRouter.post(
           .status(400)
           .json({ message: "Invalid status type:" + status });
       }
-      //! check if the user id exist in the database or not: 
+      //! check if the user id exist in the database or not:
       const checkexistingUser = await User.findById(toUserId);
-      if(!checkexistingUser){
-        return res.status(400).send({message:"user does not exist ..... "})
-      } 
+      if (!checkexistingUser) {
+        return res.status(400).send({ message: "user does not exist ..... " });
+      }
       //! check if there is an existing connection request :
       const existingConnectionRequest = await ConnectionRequestModel.findOne({
         $or: [
@@ -46,7 +46,12 @@ requestRouter.post(
       });
       const data = await connectionRequest.save();
       res.json({
-        message: "Connection request sent successfully ....",
+        message:
+          req.user.firstName +
+          "is" +
+          status +
+          "in" +
+          checkexistingUser.firstName,
         data,
       });
     } catch (error) {
