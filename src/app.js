@@ -9,7 +9,7 @@ import userAuth from "./middleware/auth.js";
 import authRouter from "./routes/authRouter.js";
 import profileRouter from "./routes/profileRouter.js";
 import requestRouter from "./routes/requestRouter.js";
-
+import userRouter from "./routes/userRouter.js";
 const app = express();
 connectWithDataBase();
 
@@ -21,6 +21,7 @@ app.use(cookieParser());
 app.use("/auth",authRouter);
 app.use("/profile",profileRouter);
 app.use("/request",requestRouter);
+app.use("/",userRouter);
 
 app.listen(3000, () => {
   console.log("server is succesfully listening on port 3000.....");

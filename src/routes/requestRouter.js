@@ -4,6 +4,7 @@ import userAuth from "../middleware/auth.js";
 const requestRouter = express.Router();
 import ConnectionRequestModel from "../models/connectionRequest.js";
 import User from "../models/user.js";
+
 requestRouter.post(
   "/request/send/:status/:toUserId",
   userAuth,
@@ -60,4 +61,34 @@ requestRouter.post(
   }
 );
 
+requestRouter.post(
+  "/request/review/:status/:requestId",
+  userAuth,
+  async (req, res) => {
+    try {
+      const loggedInUser = req.user;
+      // validate the status
+      const { status, requestId } = req.params;
+      const allowedStatus = ["accepted", "rejected"];
+      if (!allowedStatus.includes(status)) {
+        return res.status(400).json({ message: "Status not allowed ... " });
+      }
+      const connectionRequest = await ConnectionRequestModel.findOne({
+        _id: requestId,
+        toUserId: loggedInUser._id,
+        status: "interested",
+      });
+      if (!connectionRequest) {
+        res.status(400).json({ message: "Connection request not found .. " });
+      }
+      connectionRequest.status = status;
+      const data = await connectionRequest.save();
+      res.json({ message: "connection request" + status, data });
+      //check krna pdega ki jise request bheji h wohi loggin user h ;
+      // agar ignore krdia user ne fir request nhi
+    } catch (error) {
+      res.status(400).send("error: " + error.message);
+    }
+  }
+);
 export default requestRouter;
