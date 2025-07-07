@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "name": "tinderfrontend",
   "private": true,
   "version": "0.0.0",
@@ -24,5 +25,27 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
     "vite": "^5.1.4"
+=======
+  "name": "devtinder_project",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon src/app.js"
+  },
+  "keywords": [],
+  "author": "naval Joshi",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.15.2",
+    "nodemon": "^3.1.10",
+    "validator": "^13.15.15"
+>>>>>>> acd1272d2eff738a07f1933f211316df840600fb
   }
 }
